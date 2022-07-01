@@ -1,0 +1,103 @@
+---
+title: "index"
+author: "Israel Martinez"
+date: "11/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(lubridate)
+library(knitr)
+library(ggplot2)
+library(leaflet)
+source("analysis.R")
+```
+
+## Summary Information
+The data reveals that the amount of shooting events that occured in 2018 was
+**`r shooting_events`**. The amount of lives that were lost in 2018 due to
+shootings was **`r lives_lost`**. In regard to the city that was most impacted
+by shootings (cities with the highest number of killed and injured shootings),
+the city was **`r cty_most_impact`**. For my two other insights, I wanted to
+know the month with the most shootings: **`r month_most_shoot`**. I also wanted
+to know which state had the highest percentage of kills in their shootings: 
+**`r state_kill_rate`**.
+
+This information can be found [here](http://www.shootingtracker.com/).
+
+## Summary Table
+```{r table, echo=FALSE}
+table_caption <- ("The state that had the most casualties was California. The
+                  casualties are a combination of those killed and those
+                  injured.")
+kable(summary_table, caption = table_caption)
+```
+
+## Description of a particular incident
+The incident that I have chosen to describe is the event which had the most
+number of shootings (killed and injured). The data revealed that the event with
+the highest number was at **`r worst_incident$address`,**
+**`r worst_incident$city`, `r worst_incident$state`**. This event occured on
+**`r worst_incident$date`** and there were **`r worst_incident$casualties`**
+casualties (**`r worst_incident$num_killed`** killed and
+**`r worst_incident$num_injured`** injured). You can read a personal Time's
+article piece about this shooting incident
+[here](https://time.com/parkland-high-school-shooting-vigil/).
+
+## An interactive map
+The purpose of this interactive map is to showcase where the shooting incidents
+occured in the United States. Seeing the geographic location itself is
+important because it can reveal certain trends.
+```{r map, echo=FALSE}
+leaflet(data = more_column) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -97.922211, lat = 39.381266, zoom = 4) %>%
+  addCircleMarkers(
+    lng = ~long,
+    lat = ~lat,
+    popup = ~paste("Address:", address, "<br>",
+                   "Date:", date, "<br>",
+                   "Casualties:", num_killed, "killed,", num_injured,
+                   "injured"),
+    stroke = FALSE
+  )
+```
+According to this map, it looks like most of the shootings in 2018 occured in
+the Southeast region of the United States. Also, there shows to be zero
+shootings in the Northern states such as Montana, Idaho, and North Dakota.
+
+## Plot of your choice
+For this plot, I wanted to know the relationships between months and number of casualties per month so I can see any trends. So, I chose to use a bar graph to visualize the data.
+
+```{r graph, echo=FALSE}
+
+# I couldn't figure out how to get the x axis of month to be in chronological
+# order, so I used this solution:
+# https://thepracticalr.wordpress.com/tag/ggplot2/
+more_column$month <- factor(more_column$month,
+                       levels = c("January", "February", "March", "April",
+                                  "May", "June", "July", "August",
+                                  "September", "October", "November",
+                                  "December"))
+
+ggplot(more_column) +
+  geom_col(mapping = aes(x = month, y = casualties)) +
+  labs(
+    title = "2018 Shooting Casualties"
+  )
+```
+
+Looking at the graph, I first notice that the top 3 months with the highest
+casualties were summer months. Also, as the year went by after summer, the
+number of casualties slowly decreased overtime.
+
+## Critical Reflection
+I believe that this report can be used in many good ways. For example,
+legislators who write laws for gun control can use the map and maybe direct
+their energy toward states with the most shooting incidents (the Southeast for
+instance). However, if someone were to just focus on the map and work on areas
+with the most shootings, they most likely wouldn’t address the Chicago
+community which is the city with the highest number of casualties in the year.
+A big group of people could be neglected because of this.
